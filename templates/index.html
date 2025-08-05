@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Maps3D | Welcome</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Cesium.js"></script>
+  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesium_container {
+        width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+    }
+
+    header {
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        left: 10px;
+        background: rgba(255,255,255,0.8);
+        padding: 10px;
+        border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+    <div id="cesium_container"></div>
+  <main>
+    <p id="greeting">Loading …</p>
+  </main>
+  <script>
+    const viewer = new Cesium.Viewer('cesium_container',{
+        terrainProvider: Cesium.createWorldTerrainAsync()
+    });
+
+    viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(-74.006, 40.7128, 10000)
+    })
+  </script>
+</body>
+</html>
