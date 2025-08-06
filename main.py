@@ -1,14 +1,18 @@
 from flask import Flask, render_template, request, jsonify
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
+load_dotenv()
 
 @app.route("/")
 def index():
-    return render_template("index.html")
-
-@app.route("/api/hello", methods=["GET"])
-def hello():
-    return jsonify({"msg": "Hello World"})
+    cesium_token = os.getenv("ces_token")
+    if cesium_token:
+        print("Cesium Token Loaded")
+    else: 
+        print("Cesium Token not loaded")
+    return render_template("index.html", cesium_token=cesium_token)
 
 if __name__ == "__main__":
     app.run(debug=True)

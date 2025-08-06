@@ -28,6 +28,7 @@
     <p id="greeting">Loading …</p>
   </main>
   <script>
+    Cesium.Ion.defaultAccessToken = "{{ cesium_token }}";
     const viewer = new Cesium.Viewer('cesium_container',{
         terrainProvider: Cesium.createWorldTerrainAsync()
     });
