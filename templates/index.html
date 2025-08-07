@@ -20,22 +20,144 @@
         padding: 10px;
         border-radius: 8px;
     }
+
+    .menu-toggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.side-panel {
+    position: absolute;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.side-panel.open {
+    left: 0;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.panel-content {
+    padding: 20px;
+}
+
+.panel-link {
+    display: block;
+    text-decoration: none;
+    color: #333;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.panel-link:hover {
+    background: #f0f0f0;
+}
+
+.routing-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.route-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #007acc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
   </style>
 </head>
 <body>
     <div id="cesium_container"></div>
+    <button class="menu-toggle" onclick="toggleSidePanel()">☰</button>
+    <div class="side-panel" id="sidePanel">
+      <div class="panel-header">
+        <h2>Maps3D</h2>
+        <button class="close-button" onclick="toggleSidePanel()">«</button>
+      </div>
+      <div class="panel-content">
+        <a href="/" class="panel-link">Maps</a>
+        <a href="/askAi" class="panel-link">Ask AI</a>
+
+        <div class="routing-section">
+          <h3>Routing Options</h3>
+          <button class="route-button">Dijkstra's Algorithm</button>
+          <button class="route-button">A* Algorithm</button>
+        </div>
+      </div>
+    </div>
   <main>
-    <p id="greeting">Loading …</p>
+    <p id="loading">Loading …</p>
   </main>
   <script>
-    Cesium.Ion.defaultAccessToken = "{{ cesium_token }}";
-    const viewer = new Cesium.Viewer('cesium_container',{
-        terrainProvider: Cesium.createWorldTerrainAsync()
-    });
+    function toggleSidePanel() {
+      const panel = document.getElementById('sidePanel');
+      panel.classList.toggle('open');
+    }
 
-    viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(-74.006, 40.7128, 10000)
-    })
+    Cesium.Ion.defaultAccessToken = "{{ cesium_token }}";
+    async function intiliaze_viewer(){
+      try {
+        const terrain_provider = await Cesium.createWorldTerrainAsync();
+        const viewer = new Cesium.Viewer('cesium_container', {
+          terrainProvider: terrain_provider,
+          timeline: false,
+          animation: false,
+        });
+        
+        const building_tileset = await Cesium.createGooglePhotorealistic3DTileset();
+        viewer.scene.primitives.add(building_tileset)
+        
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(-74.006, 40.7128, 10000),
+          duration: 3.0
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        console.log('Cesium viewer loaded successfully');
+      } catch (error) {
+          console.error('Error initializing viewer: ', error);
+          const loading_element = document.getElementById('loading');
+          if (loading_element) {
+            loading_element.innerHTML = 'Error loading globe';
+            loading_element.style.display = 'block';
+          }
+      }
+    }
+
+    window.addEventListener('load', intiliaze_viewer)
   </script>
 </body>
 </html>
+
+ 
