@@ -22,23 +22,23 @@ def tree_parser():
             'ways': set()
         }
 
-        #starts at root node and finds everything that has 'node'
-        for way in root.findall('way'):
-            # loop should get the way id, 
-            # node references (nodes that share ways), 
-            # way tags. different from node tags
-            way_id = int(way.get('id'))
-            nd_ref = [int(nd.get('ref') for nd in way.findall('nd'))]
-            way_tags = {tag.get('k'): tag.get('v') for tag in way.findall('tag')}
-            ways[way_id] = {'nodes': nd_ref,
-                            'tags': way_tags}
-            
-            #loop should go through reference nodes in nd_ref (list), 
-            # check if ref is a key in nodes, 
-            # if yes, add the way id to 'ways'
-            for ref in nd_ref:
-                if ref in nodes:
-                    nodes[ref]['ways'].add(way_id)
+    #starts at root node and finds everything that has 'node'
+    for way in root.findall('way'):
+        # loop should get the way id, 
+        # node references (nodes that share ways), 
+        # way tags. different from node tags
+        way_id = int(way.get('id'))
+        nd_ref = [int(nd.get('ref')) for nd in way.findall('nd')]
+        way_tags = {tag.get('k'): tag.get('v') for tag in way.findall('tag')}
+        ways[way_id] = {'nodes': nd_ref,
+                        'tags': way_tags}
+        
+        #loop should go through reference nodes in nd_ref (list), 
+        # check if ref is a key in nodes, 
+        # if yes, add the way id to 'ways'
+        for ref in nd_ref:
+            if ref in nodes:
+                nodes[ref]['ways'].add(way_id)
             
 
         
