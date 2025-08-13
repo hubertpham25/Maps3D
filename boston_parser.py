@@ -29,16 +29,22 @@ def tree_parser():
         # way tags. different from node tags
         way_id = int(way.get('id'))
         nd_ref = [int(nd.get('ref')) for nd in way.findall('nd')]
-        way_tags = {tag.get('k'): tag.get('v') for tag in way.findall('tag')}
+        #ignore footpaths
+        way_tags = dict()
+        for tag in way.findall('tag'):
+            v = tag.get('v')
+            k = tag.get('k')
+            if k == 'highway' and v == 'footway':
+                continue
+            way_tags[k] = v
+
         ways[way_id] = {'nodes': nd_ref,
                         'tags': way_tags}
         
-        #loop should go through reference nodes in nd_ref (list), 
+        # loop should go through reference nodes in nd_ref (list), 
         # check if ref is a key in nodes, 
-        # if yes, add the way id to 'ways'
+        # if yes, add the way id to 'ways'. ref nodes are nodes that are related some way.
         for ref in nd_ref:
             if ref in nodes:
                 nodes[ref]['ways'].add(way_id)
-            
-
-        
+    
