@@ -1,11 +1,12 @@
 import xml.etree.ElementTree as ET
 
 def tree_parser():
-    tree = ET.parse('boston_map.osm')
+    tree = ET.parse('data/boston_map.osm')
     root = tree.getroot()
 
     nodes = dict() #nodes
     ways = dict() #edges
+    stores = dict()
 
     #starts at root node and finds everything that has 'node'
     for node in root.findall('node'):
@@ -13,12 +14,55 @@ def tree_parser():
         node_id = int(node.get('id'))
         lat = float(node.get('lat'))
         lon = float(node.get('lon'))
-        nd_tags = {tag.get('k'): tag.get('v') for tag in node.findall('tag')}
+
         coord = (lat, lon)
+        
+        city = ""
+        street_num = ""
+        zip = ""
+        state = ""
+        street = ""
+        store_name = ""
+        # loop through all nodes and go through the tags
+        for nd_tags in node.findall('tag'):
+            k = nd_tags.get('k')
+            v = nd_tags.get('v')
+
+            if k == "addr:city":
+                city = v
+
+            elif k == "addr:housenumber":
+                street_num = v
+
+            elif k == "addr:postcode":
+                zip = v
+
+            elif k == "addr:state":
+                state = v
+            
+            elif k == "addr:street":
+                street = v
+
+            elif k == "name":
+                store_name = v
+            
+            # this loop should grab everything listed above
+            address = f"{street_num} {street}, {city}, {state} {zip}"
+            if store_name:
+                if store_name not in stores:
+                    stores[store_name] = {
+                        "locations": [
+                            {"address": address, "coord": coord, "node id": node_id}
+                        ]
+                    }
+                
+                else:
+                    stores[store_name]["locations"].append({
+                        "address": address, "coord": coord, "node id": node_id
+                    })
 
         nodes[node_id] = {
             'coord': coord,
-            'tags': nd_tags,
             'ways': set()
         }
 
@@ -47,4 +91,5 @@ def tree_parser():
         for ref in nd_ref:
             if ref in nodes:
                 nodes[ref]['ways'].add(way_id)
+    return nodes, ways, stores
     
