@@ -5,7 +5,7 @@ import os, redis, openai, json
 app = Flask(__name__)
 load_dotenv()
 
-# client = OpenAI(api_key=os.getenv("openai_key"))
+
 
 @app.route("/askAi")
 def ask_ai():

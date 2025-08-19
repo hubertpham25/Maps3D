@@ -1,4 +1,5 @@
 from boston_parser import tree_parser, nodes, ways
+import math
 
 def build_routing_graph():
     intersections = dict()

@@ -95,6 +95,30 @@
     border-radius: 6px;
     cursor: pointer;
 }
+
+.route-input {
+  
+}
+.route-text {
+  resize: none;
+  margin-bottom: 2%;
+  width: 97.3%;
+  border-radius: 6px;
+  height: 2vh;
+}
+
+.find-route-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #007acc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
   </style>
 </head>
 <body>
@@ -107,12 +131,12 @@
       </div>
       <div class="panel-content">
         <a href="/" class="panel-link">Maps</a>
-        <a href="/askAi" class="panel-link">Ask AI</a>
 
-        <div class="routing-section">
-          <h3>Routing Options</h3>
-          <button class="route-button">Dijkstra's Algorithm</button>
-          <button class="route-button">A* Algorithm</button>
+        <div class="route-input">
+          <h3>Where to?</h3>
+            <input type="text" id="fromPoint" class="route-text" placeholder="From" required>
+            <input type="text" id="toPoint" class="route-text" placeholder="To" required>
+            <button onclick="getPoints()" class="find-route-button">Find A Route</button>
         </div>
       </div>
     </div>
@@ -120,6 +144,22 @@
     <p id="loading">Loading …</p>
   </main>
   <script>
+    function getPoints() {
+      const fromPoint = document.getElementById("fromPoint").value;
+      const toPoint = document.getElementById("toPoint").value;
+
+      fetch('/checkPoints', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: fromPoint,
+          to: toPoint
+        })
+      })
+    }
+
     function toggleSidePanel() {
       const panel = document.getElementById('sidePanel');
       panel.classList.toggle('open');
@@ -139,7 +179,7 @@
         viewer.scene.primitives.add(building_tileset)
         
         viewer.camera.flyTo({
-          destination: Cesium.Cartesian3.fromDegrees(-74.006, 40.7128, 10000),
+          destination: Cesium.Cartesian3.fromDegrees(-71.05886, 42.3610, 2600),
           duration: 3.0
         });
 
