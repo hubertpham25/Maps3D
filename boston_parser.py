@@ -6,7 +6,7 @@ def tree_parser():
 
     nodes = dict() #nodes
     ways = dict() #edges
-    stores = dict()
+    addresses = dict()
 
     #starts at root node and finds everything that has 'node'
     for node in root.findall('node'):
@@ -16,11 +16,8 @@ def tree_parser():
         lon = float(node.get('lon'))
 
         coord = (lat, lon)
-        
-        city = ""
+
         street_num = ""
-        zip = ""
-        state = ""
         street = ""
         store_name = ""
         # loop through all nodes and go through the tags
@@ -28,17 +25,8 @@ def tree_parser():
             k = nd_tags.get('k')
             v = nd_tags.get('v')
 
-            if k == "addr:city":
-                city = v
-
-            elif k == "addr:housenumber":
+            if k == "addr:housenumber":
                 street_num = v
-
-            elif k == "addr:postcode":
-                zip = v
-
-            elif k == "addr:state":
-                state = v
             
             elif k == "addr:street":
                 street = v
@@ -47,20 +35,18 @@ def tree_parser():
                 store_name = v
             
             # this loop should grab everything listed above
-            address = f"{street_num} {street}, {city}, {state} {zip}"
-            if store_name:
-                if store_name not in stores:
-                    stores[store_name] = {
-                        "locations": [
-                            {"address": address, "coord": coord, "node id": node_id}
-                        ]
+            address = f"{street_num} {street}"
+            if address and street:
+                address = f"{street_num} {street}".strip()
+                if address not in addresses:
+                    addresses[address] = {
+                        "info": [{
+                            "store name": store_name,
+                            "coord": coord,
+                            "ID": node_id,
+                        }]
                     }
-                
-                else:
-                    stores[store_name]["locations"].append({
-                        "address": address, "coord": coord, "node id": node_id
-                    })
-
+                    
         nodes[node_id] = {
             'coord': coord,
             'ways': set()
@@ -91,5 +77,5 @@ def tree_parser():
         for ref in nd_ref:
             if ref in nodes:
                 nodes[ref]['ways'].add(way_id)
-    return nodes, ways, stores
+    return nodes, ways, addresses
     

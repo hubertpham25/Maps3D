@@ -8,28 +8,24 @@ app = Flask(__name__)
 load_dotenv()
 
 # print("Loading map data...")
-nodes, ways, stores = tree_parser()
+nodes, ways, addresses = tree_parser()
 # routing_graph = build_routing_graph(nodes, ways)
 # print("Map data loaded")
 @app.route("/checkPoints", methods=['POST'])
 def check_points():
     data = request.get_json()
 
-    from_store = data["from"]
-    to_store = data["to"]
+    from_address = data["from"]
+    to_address = data["to"]
 
-    if from_store not in stores or to_store not in stores:
+    if from_address not in addresses or to_address not in addresses:
         return jsonify({'error': 'Store not found'}), 404
     
     return jsonify({
-        'From stores': stores[from_store]["locations"],
-        'To stores': stores[to_store]["locations"],
-        'Message': 'Multiple locations found. Please choose one.'
+        'from_stores': addresses[from_address],
+        'to_stores': addresses[to_address],
     })
 
-    
-    
-        
 @app.route("/")
 def index():
     cesium_token = os.getenv("ces_token") #grabs cesium token from .env

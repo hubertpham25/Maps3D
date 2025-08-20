@@ -134,8 +134,8 @@
 
         <div class="route-input">
           <h3>Where to?</h3>
-            <input type="text" id="fromPoint" class="route-text" placeholder="From (Ex: Dunkin Donuts)" required>
-            <input type="text" id="toPoint" class="route-text" placeholder="To (Ex: TD Garden)" required> 
+            <input type="text" id="fromPoint" class="route-text" placeholder="1 City Hall Square (Boston City Hall)" required>
+            <input type="text" id="toPoint" class="route-text" placeholder="100 Hanover Street (Boston Public Market)" required> 
             <button onclick="getPoints()" class="find-route-button">Find A Route</button>
         </div>
       </div>
@@ -157,6 +157,27 @@
           from: fromPoint,
           to: toPoint
         })
+      })
+      .then (response => {
+        console.log('Response status: ', response.status);
+        console.log('Response ok: ', response.ok)
+
+        if (!response.ok){
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then (data => {
+        console.log('Received data: ', data);
+        if (data.error) {
+          alert('Error: ' + data.error);
+          return;
+        }
+      })
+
+      .catch (error => {
+        console.error('Fetch error: ', error);
+        alert('Network error' + error.message);
       })
     }
 
