@@ -26,6 +26,13 @@ def check_points():
         'to_stores': addresses[to_address],
     })
 
+@app.route("/findRoute", methods=['POST'])
+def find_route():
+    coord_data = request.get_json()
+
+    from_coord = coord_data["from_coords"]
+    to_coord = coord_data["to_coords"]
+
 @app.route("/")
 def index():
     cesium_token = os.getenv("ces_token") #grabs cesium token from .env

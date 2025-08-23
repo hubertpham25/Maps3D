@@ -158,6 +158,7 @@
           to: toPoint
         })
       })
+
       .then (response => {
         console.log('Response status: ', response.status);
         console.log('Response ok: ', response.ok)
@@ -174,12 +175,38 @@
           return;
         }
       })
-
+      
       .catch (error => {
         console.error('Fetch error: ', error);
         alert('Network error' + error.message);
       })
     }
+
+      const from_info = data.from_stores;
+      const to_info = data.to_stores;
+
+      if (from_info && from_info.info) {
+        const from_location = from_info.info[0]
+        const from_coord = from_location.coord;
+        const from_id = from_location.ID;
+      }
+
+      if (to_info && to_info.info) {
+        const to_location = to_info.info[0]
+        const to_coord = to_location.coord;
+        const to_id = to_location.ID;
+      }
+
+      fetch('/findRoute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from_coords: from_coord,
+          to_coords: to_coord,
+        })
+      })
 
     function toggleSidePanel() {
       const panel = document.getElementById('sidePanel');
