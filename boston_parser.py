@@ -64,7 +64,7 @@ def tree_parser():
         for tag in way.findall('tag'):
             v = tag.get('v')
             k = tag.get('k')
-            if k == 'highway' and v == 'footway':
+            if (k == 'highway' and v == 'footway'):
                 continue
             way_tags[k] = v
 
