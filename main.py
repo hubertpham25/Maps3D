@@ -2,16 +2,18 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 from boston_parser import tree_parser
 from graph_builder import build_routing_graph, calculate_distance
-from run_astar import astar, filter_intersections, filter_graph
+from run_dijkstra import dijkstra
 import os, redis, openai, json
 
 app = Flask(__name__)
+redis_client = redis.Redis(host="localhost", port=6379, db=0)
 load_dotenv()
 
 print("Loading map data...")
 nodes, ways, addresses = tree_parser()
 routing_graph, intersections = build_routing_graph(nodes, ways)
 print("Map data loaded")
+
 @app.route("/checkPoints", methods=['POST'])
 def check_points():
     data = request.get_json()
@@ -38,16 +40,13 @@ def find_route():
     from_node = find_nearest_intersection(from_coord, intersections)
     to_node = find_nearest_intersection(to_coord, intersections)
 
-    # filtered_intersections = filter_intersections(intersections, from_coord, to_coord)
-    # filtered_graph = filter_graph(routing_graph, filtered_intersections)
-    # print(f'filtered to {len(filtered_intersections)}')
     print("From node:", from_node, intersections[from_node])
     print("To node:", to_node, intersections[to_node])
     print("From neighbors:", routing_graph.get(from_node, {}))
     print("To neighbors:", routing_graph.get(to_node, {}))
     print(f'finding route...')
 
-    route = astar(from_node, to_node, routing_graph, intersections)
+    route = dijkstra(from_node, to_node, routing_graph)
     print(f'route found: {route}')
     return jsonify({'route': route})
 

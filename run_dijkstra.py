@@ -1,32 +1,39 @@
 import heapq
 from graph_builder import calculate_distance
 
-def astar(start, end, graph, intersections):
+def dijkstra(start, end, graph):
     distances = {node_id: float('inf') for node_id in graph}
     distances[start] = 0
-
+    
     previous = {node_id: None for node_id in graph}
-
-    to_visit = list()
+    
+    to_visit = []
     heapq.heappush(to_visit, (0, start))
-
+    
+    visited = set()
+    
     while to_visit:
-        current_cost, current_node = heapq.heappop(to_visit)
-
-        if current_cost > distances[current_node]:
+        current_distance, current_node = heapq.heappop(to_visit)
+        
+        if current_node in visited:
             continue
+        visited.add(current_node)
+        
         if current_node == end:
             return reconstruct_path(previous, start, end)
-
-        for neighbor, weight in graph[current_node].items():
-            new_cost = current_cost + weight
+        
+        for neighbor, weight in graph.get(current_node, {}).items():
+            if neighbor in visited:
+                continue
             
-            if new_cost < distances[neighbor]:
-                distances[neighbor] = new_cost
+            new_distance = current_distance + weight
+            if new_distance < distances[neighbor]:
+                distances[neighbor] = new_distance
                 previous[neighbor] = current_node
-                heapq.heappush(to_visit, (new_cost, neighbor))
-
-    return list()
+                heapq.heappush(to_visit, (new_distance, neighbor))
+    
+    print("No path found")
+    return []
 
 def heuristic(current_node, end_node, intersections):
     current_coord = intersections[current_node]['coord']
