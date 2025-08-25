@@ -1,46 +1,56 @@
 import math
 
 def build_routing_graph(nodes, ways):
-    intersections = dict()
-    for node_id, node_data in nodes.items():
-        if len(node_data['ways']) > 1:
-            intersections[node_id] = node_data
-
-    graph = dict()
-
-    for intersection_id in intersections:
-        graph[intersection_id] = dict()    
-
+    graph = {}
+    road_nodes = set()
+    
     for way_id, way_data in ways.items():
         if 'highway' not in way_data['tags']:
+            continue
+            
+        highway_type = way_data['tags']['highway']
+        if highway_type in ['footway', 'cycleway', 'pedestrian', 'steps']:
             continue
         
         if 'maxspeed' not in way_data['tags']:
             maxspeed = 25
-
         else: 
-            maxspeed = int(way_data['tags']['maxspeed'].strip(' mph'))
-
-        way_nodes = way_data['nodes']
-        way_intersections = list()
-        for way_node in way_nodes:
-            if way_node in intersections:
-                way_intersections.append(way_node)
+            maxspeed_str = way_data['tags']['maxspeed']
+            if 'mph' in maxspeed_str:
+                maxspeed = int(maxspeed_str.strip(' mph'))
+            else:
+                maxspeed = 25
         
-        for i in range(len(way_intersections) - 1):
-            from_node = way_intersections[i]
-            to_node = way_intersections[i + 1]
+        way_nodes = way_data['nodes']
+        
+        for node in way_nodes:
+            if node in nodes:
+                road_nodes.add(node)
+        
+        for i in range(len(way_nodes) - 1):
+            from_node = way_nodes[i]
+            to_node = way_nodes[i + 1]
             
-            from_coord = intersections[from_node]['coord']
-            to_coord = intersections[to_node]['coord']
+            if from_node not in nodes or to_node not in nodes:
+                continue
+            
+            from_coord = nodes[from_node]['coord']
+            to_coord = nodes[to_node]['coord']
             distance = calculate_distance(from_coord, to_coord)
             travel_time = time_weight(distance, maxspeed)
-
+            
+            if from_node not in graph:
+                graph[from_node] = {}
+            if to_node not in graph:
+                graph[to_node] = {}
+            
             graph[from_node][to_node] = travel_time
             if way_data['tags'].get('oneway') != 'yes':
                 graph[to_node][from_node] = travel_time
     
-    return graph, intersections
+    road_connected_nodes = {nid: nodes[nid] for nid in road_nodes if nid in graph and graph[nid]}
+    
+    return graph, road_connected_nodes
                 
 
 def calculate_distance(coord1, coord2):
@@ -51,7 +61,8 @@ def calculate_distance(coord1, coord2):
     dlat = lat2 - lat1
     dlon = lon2 - lon1
     a = math.sin(dlat/2)**2 + math.cos(lat1)*math.cos(lat2) * math.sin(dlon/2)**2
-    return 2*radius*math.sin(math.sqrt(a))
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    return radius*c
 
 def time_weight(distance, maxspeed):
     time_minutes = (distance/maxspeed)*60

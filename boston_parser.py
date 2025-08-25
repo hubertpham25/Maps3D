@@ -35,9 +35,9 @@ def tree_parser():
                 store_name = v
             
             # this loop should grab everything listed above
-            address = f"{street_num} {street}"
+            address = f"{street_num} {street.lower()}"
             if address and street:
-                address = f"{street_num} {street}".strip()
+                address = f"{street_num} {street.lower()}".strip()
                 if address not in addresses:
                     addresses[address] = {
                         "info": [{
