@@ -11,7 +11,7 @@ def build_routing_graph(nodes, ways):
     for intersection_id in intersections:
         graph[intersection_id] = dict()    
 
-    for way_id, way_data in ways:
+    for way_id, way_data in ways.items():
         if 'highway' not in way_data['tags']:
             continue
         
@@ -19,7 +19,7 @@ def build_routing_graph(nodes, ways):
             maxspeed = 25
 
         else: 
-            maxspeed = int(way_data['tags']['maxspeed'].strip('mmph'))
+            maxspeed = int(way_data['tags']['maxspeed'].strip(' mph'))
 
         way_nodes = way_data['nodes']
         way_intersections = list()
@@ -27,7 +27,7 @@ def build_routing_graph(nodes, ways):
             if way_node in intersections:
                 way_intersections.append(way_node)
         
-        for i in range(len(intersections) - 1):
+        for i in range(len(way_intersections) - 1):
             from_node = way_intersections[i]
             to_node = way_intersections[i + 1]
             
@@ -39,12 +39,14 @@ def build_routing_graph(nodes, ways):
             graph[from_node][to_node] = travel_time
             if way_data['tags'].get('oneway') != 'yes':
                 graph[to_node][from_node] = travel_time
+    
+    return graph, intersections
                 
 
 def calculate_distance(coord1, coord2):
     lat1, lon1 = coord1
     lat2, lon2 = coord2
-    radius = 6371000
+    radius = 3959
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
     dlat = lat2 - lat1
     dlon = lon2 - lon1
@@ -52,5 +54,5 @@ def calculate_distance(coord1, coord2):
     return 2*radius*math.sin(math.sqrt(a))
 
 def time_weight(distance, maxspeed):
-    time_minutes = (maxspeed/distance)/60
+    time_minutes = (distance/maxspeed)*60
     return time_minutes

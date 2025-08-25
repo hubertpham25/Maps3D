@@ -174,7 +174,35 @@
           alert('Error: ' + data.error);
           return;
         }
+        const from_info = data.from_stores;
+        const to_info = data.to_stores;
+
+        let from_coord, from_id, to_coord, to_id
+        if (from_info && from_info.info) {
+          const from_location = from_info.info[0]
+          from_coord = from_location.coord;
+          from_id = from_location.ID;
+        }
+
+        if (to_info && to_info.info) {
+          const to_location = to_info.info[0]
+          to_coord = to_location.coord;
+          to_id = to_location.ID;
+        }
+
+        return fetch('/findRoute', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from_coords: from_coord,
+            to_coords: to_coord,
+          })
+        });
       })
+
+      .then(result => result.json())
       
       .catch (error => {
         console.error('Fetch error: ', error);
@@ -182,31 +210,7 @@
       })
     }
 
-      const from_info = data.from_stores;
-      const to_info = data.to_stores;
-
-      if (from_info && from_info.info) {
-        const from_location = from_info.info[0]
-        const from_coord = from_location.coord;
-        const from_id = from_location.ID;
-      }
-
-      if (to_info && to_info.info) {
-        const to_location = to_info.info[0]
-        const to_coord = to_location.coord;
-        const to_id = to_location.ID;
-      }
-
-      fetch('/findRoute', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          from_coords: from_coord,
-          to_coords: to_coord,
-        })
-      })
+      
 
     function toggleSidePanel() {
       const panel = document.getElementById('sidePanel');

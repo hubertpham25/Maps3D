@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 from boston_parser import tree_parser
-# from graph_builder import build_routing_graph
+from graph_builder import build_routing_graph
+from run_dijkstra import dijkstra
 import os, redis, openai, json
 
 app = Flask(__name__)
@@ -9,7 +10,7 @@ load_dotenv()
 
 # print("Loading map data...")
 nodes, ways, addresses = tree_parser()
-# routing_graph = build_routing_graph(nodes, ways)
+routing_graph = build_routing_graph(nodes, ways)
 # print("Map data loaded")
 @app.route("/checkPoints", methods=['POST'])
 def check_points():
@@ -32,6 +33,9 @@ def find_route():
 
     from_coord = coord_data["from_coords"]
     to_coord = coord_data["to_coords"]
+
+    route = dijkstra(from_coord, to_coord, routing_graph)
+    return jsonify({'route': route})
 
 @app.route("/")
 def index():
