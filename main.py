@@ -6,7 +6,7 @@ from run_dijkstra import dijkstra
 import os, redis, openai, json
 
 app = Flask(__name__)
-redis_client = redis.Redis(host="localhost", port=6379, db=0)
+redis_cache = redis.Redis(host="localhost", port=6379, db=0)
 load_dotenv()
 
 print("Loading map data...")
