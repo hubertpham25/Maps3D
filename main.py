@@ -14,6 +14,7 @@ print("Loading map data...")
 nodes, ways, addresses = tree_parser()
 routing_graph, intersections = build_routing_graph(nodes, ways)
 print("Map data loaded")
+print(addresses)
 
 @app.route("/checkPoints", methods=['POST'])
 def check_points():
