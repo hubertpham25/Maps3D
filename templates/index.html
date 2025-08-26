@@ -216,7 +216,104 @@
       })
     }
 
-    
+    function drawRoute(coordinates, route){
+      clearRoute();
+
+      const positions = coordinates.map(coord =>{
+        return Cesium.Cartesian3.fromDegrees(coord[1], coord[0], coord[5]);
+      });
+
+      if (positions.length < 2){
+        showError('Not enough points');
+        return;
+      }
+
+      currentRoute = viewer.entities.add({
+        name: 'Route',
+        polyline:{
+          positions: positions,
+          width: 6,
+          material: new Cesium.PolylineGlowMaterialProperty({
+            glowPower: 0.3,
+            color: Cesium.Color.CYAN
+          }),
+          clampToGround: true,
+          zIndex: 1,
+        }
+      });
+
+      startMarker = viewer.entities.add({
+            name: 'Start',
+            position: positions[0],
+            point: {
+                pixelSize: 12,
+                color: Cesium.Color.GREEN,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 3,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                zIndex: 2
+            },
+            label: {
+                text: 'START',
+                font: '14pt sans-serif',
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset: new Cesium.Cartesian2(0, -15),
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+            }
+        });
+
+        endMarker = viewer.entities.add({
+            name: 'End',
+            position: positions[positions.length - 1],
+            point: {
+                pixelSize: 12,
+                color: Cesium.Color.RED,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 3,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                zIndex: 2
+            },
+            label: {
+                text: 'END',
+                font: '14pt sans-serif',
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset: new Cesium.Cartesian2(0, -15),
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+            }
+        });
+
+        function clearRoute() {
+        clearRouteVisualization();
+        document.getElementById('routeInfo').style.display = 'none';
+        document.getElementById('clearRouteBtn').style.display = 'none';
+        hideError();
+    }
+
+    function clearRouteVisualization() {
+        if (!viewer) return;
+        
+        if (currentRouteEntity) {
+            viewer.entities.remove(currentRouteEntity);
+            currentRouteEntity = null;
+        }
+        if (startMarker) {
+            viewer.entities.remove(startMarker);
+            startMarker = null;
+        }
+        if (endMarker) {
+            viewer.entities.remove(endMarker);
+            endMarker = null;
+        }
+        
+        routeWaypoints.forEach(wp => viewer.entities.remove(wp));
+        routeWaypoints = [];
+    }
+    }
+
     function toggleSidePanel() {
       const panel = document.getElementById('sidePanel');
       panel.classList.toggle('open');
