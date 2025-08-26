@@ -119,6 +119,18 @@
   cursor: pointer;
 }
 
+.clear-route-btn{
+  display: block;
+  width: 100%; 
+  padding: 10px; 
+  margin-top: 10px; 
+  background: #dc3545; 
+  color: white; 
+  border: none; 
+  border-radius: 6px; 
+  cursor:pointer;
+}
+
   </style>
 </head>
 <body>
@@ -131,12 +143,14 @@
       </div>
       <div class="panel-content">
         <a href="/" class="panel-link">Maps</a>
+        <a href="/address" class="panel-link">Addresses</a>
 
         <div class="route-input">
           <h3>Where to?</h3>
             <input type="text" id="fromPoint" class="route-text" placeholder="1 City Hall Square (Boston City Hall)" required>
             <input type="text" id="toPoint" class="route-text" placeholder="100 Hanover Street (Boston Public Market)" required> 
             <button onclick="getPoints()" class="find-route-button">Find A Route</button>
+            <button onclick="clearRoute()" id="clear-route-btn" class="clear-route-btn">Clear Route</button>
         </div>
       </div>
     </div>
@@ -144,6 +158,13 @@
     <p id="loading">Loading …</p>
   </main>
   <script>
+
+    let viewer = null;
+    let currentRoute = null;
+    let startMarker = null;
+    let endMarker = null;
+    let routePoints = [];
+
     function getPoints() {
       const fromPoint = document.getElementById("fromPoint").value;
       const toPoint = document.getElementById("toPoint").value;
@@ -202,6 +223,8 @@
         });
       })
 
+      .then(response => response.json())
+
       .then(route => {
         console.log("Route: ", route)
 
@@ -220,11 +243,11 @@
       clearRoute();
 
       const positions = coordinates.map(coord =>{
-        return Cesium.Cartesian3.fromDegrees(coord[1], coord[0], coord[5]);
+        return Cesium.Cartesian3.fromDegrees(coord[1], coord[0], 10);
       });
 
       if (positions.length < 2){
-        showError('Not enough points');
+        alert('Not enough points');
         return;
       }
 
@@ -232,7 +255,7 @@
         name: 'Route',
         polyline:{
           positions: positions,
-          width: 6,
+          width: 20,
           material: new Cesium.PolylineGlowMaterialProperty({
             glowPower: 0.3,
             color: Cesium.Color.CYAN
@@ -285,20 +308,19 @@
                 heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
             }
         });
+    }
 
-        function clearRoute() {
+    function clearRoute() {
         clearRouteVisualization();
-        document.getElementById('routeInfo').style.display = 'none';
-        document.getElementById('clearRouteBtn').style.display = 'none';
-        hideError();
+        document.getElementById('clear-route-btn').style.display = 'none';
     }
 
     function clearRouteVisualization() {
         if (!viewer) return;
         
-        if (currentRouteEntity) {
-            viewer.entities.remove(currentRouteEntity);
-            currentRouteEntity = null;
+        if (currentRoute) {
+            viewer.entities.remove(currentRoute);
+            currentRoute = null;
         }
         if (startMarker) {
             viewer.entities.remove(startMarker);
@@ -309,9 +331,8 @@
             endMarker = null;
         }
         
-        routeWaypoints.forEach(wp => viewer.entities.remove(wp));
-        routeWaypoints = [];
-    }
+        routePoints.forEach(wp => viewer.entities.remove(wp));
+        routePoints = [];
     }
 
     function toggleSidePanel() {
@@ -323,7 +344,7 @@
     async function intiliaze_viewer(){
       try {
         const terrain_provider = await Cesium.createWorldTerrainAsync();
-        const viewer = new Cesium.Viewer('cesium_container', {
+        viewer = new Cesium.Viewer('cesium_container', {
           terrainProvider: terrain_provider,
           timeline: false,
           animation: false,

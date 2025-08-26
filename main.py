@@ -70,6 +70,21 @@ def find_route():
     redis_cache.set(cache_key, json.dumps(route_data))
     return jsonify(route_data)
 
+@app.route("/")
+def index():
+    cesium_token = os.getenv("ces_token") #grabs cesium token from .env
+
+    #checks if token loads
+    if cesium_token:
+        print("Cesium Token Loaded")
+    else: 
+        print("Cesium Token not loaded")
+    return render_template("index.html", cesium_token=cesium_token)
+
+@app.route("/address")
+def address_page():
+    return render_template("addresses.html")
+
 def generate_cache_key(from_node, to_node):
     return f"{from_node}:{to_node}"
 
@@ -84,17 +99,6 @@ def find_nearest_intersection(coord, intersections):
             nearest_node = node_id
 
     return nearest_node
-
-@app.route("/")
-def index():
-    cesium_token = os.getenv("ces_token") #grabs cesium token from .env
-
-    #checks if token loads
-    if cesium_token:
-        print("Cesium Token Loaded")
-    else: 
-        print("Cesium Token not loaded")
-    return render_template("index.html", cesium_token=cesium_token)
 
 if __name__ == "__main__":
     app.run(debug=True)
