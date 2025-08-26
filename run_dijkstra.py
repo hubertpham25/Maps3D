@@ -35,30 +35,6 @@ def dijkstra(start, end, graph):
     print("No path found")
     return []
 
-def heuristic(current_node, end_node, intersections):
-    current_coord = intersections[current_node]['coord']
-    end_coord = intersections[end_node]['coord']
-    return calculate_distance(current_coord, end_coord)
-
-def filter_intersections(intersections, start_coord, end_coord, radius_miles=0.3):
-    filtered = dict()
-    for node_id, node_data in intersections.items():
-        node_coord = node_data['coord']
-        dist_to_start = calculate_distance(start_coord, node_coord)
-        dist_to_end = calculate_distance(end_coord, node_coord)
-
-        if (dist_to_start <= radius_miles) or (dist_to_end <= radius_miles):
-            filtered[node_id] = node_data
-
-    return filtered
-
-def filter_graph(graph, relevant_nodes):
-    filtered_graph = dict()
-    for node in graph:
-        if node in relevant_nodes:
-            filtered_graph[node] = graph[node]
-    return filtered_graph
-
 def reconstruct_path(previous, start, end):
     path = list()
     current = end

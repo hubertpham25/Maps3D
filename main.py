@@ -3,10 +3,11 @@ from dotenv import load_dotenv
 from boston_parser import tree_parser
 from graph_builder import build_routing_graph, calculate_distance
 from run_dijkstra import dijkstra
-import os, redis, openai, json
+import os, redis, json
 
 app = Flask(__name__)
 redis_cache = redis.Redis(host="localhost", port=6379, db=0)
+
 load_dotenv()
 
 print("Loading map data...")
@@ -39,7 +40,14 @@ def find_route():
 
     from_node = find_nearest_intersection(from_coord, intersections)
     to_node = find_nearest_intersection(to_coord, intersections)
+    cache_key = generate_cache_key(from_node, to_node)
+    cached = redis_cache.get(cache_key)
+    if cached:
+        print("in cache")
+        print(cached)
+        return jsonify(json.loads(cached))
 
+    print
     print("From node:", from_node, intersections[from_node])
     print("To node:", to_node, intersections[to_node])
     print("From neighbors:", routing_graph.get(from_node, {}))
@@ -47,8 +55,22 @@ def find_route():
     print(f'finding route...')
 
     route = dijkstra(from_node, to_node, routing_graph)
+    route_coords = list()
+    for node_id in route:
+        if node_id in nodes:
+            route_coords.append(nodes[node_id]['coord'])
+
     print(f'route found: {route}')
-    return jsonify({'route': route})
+    print(f'route coords: {route_coords}')
+    route_data = {
+        'route': route,
+        'coords': route_coords
+    }
+    redis_cache.set(cache_key, json.dumps(route_data))
+    return jsonify(route_data)
+
+def generate_cache_key(from_node, to_node):
+    return f"{from_node}:{to_node}"
 
 def find_nearest_intersection(coord, intersections):
     min_distance = float('inf')

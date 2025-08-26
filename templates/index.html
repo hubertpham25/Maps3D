@@ -202,16 +202,21 @@
         });
       })
 
-      .then(result => result.json())
-      
+      .then(route => {
+        console.log("Route: ", route)
+
+        if (route.coords) {
+          drawRoute(route.coords, route.route)
+        }
+      })
+
       .catch (error => {
         console.error('Fetch error: ', error);
         alert('Network error' + error.message);
       })
     }
 
-      
-
+    
     function toggleSidePanel() {
       const panel = document.getElementById('sidePanel');
       panel.classList.toggle('open');
