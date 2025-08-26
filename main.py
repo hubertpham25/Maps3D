@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-from boston_parser import tree_parser
+from boston_parser import tree_parser, get_street_names
 from graph_builder import build_routing_graph, calculate_distance
 from run_dijkstra import dijkstra
 import os, redis, json
+import time
 
 app = Flask(__name__)
 redis_cache = redis.Redis(host="localhost", port=6379, db=0)
@@ -13,8 +14,8 @@ load_dotenv()
 print("Loading map data...")
 nodes, ways, addresses = tree_parser()
 routing_graph, intersections = build_routing_graph(nodes, ways)
+street_names = get_street_names(addresses)
 print("Map data loaded")
-print(addresses)
 
 @app.route("/checkPoints", methods=['POST'])
 def check_points():
@@ -48,24 +49,26 @@ def find_route():
         print(cached)
         return jsonify(json.loads(cached))
 
-    print
     print("From node:", from_node, intersections[from_node])
     print("To node:", to_node, intersections[to_node])
     print("From neighbors:", routing_graph.get(from_node, {}))
     print("To neighbors:", routing_graph.get(to_node, {}))
     print(f'finding route...')
 
+    start_time = time.time()
     route = dijkstra(from_node, to_node, routing_graph)
+    processing_time = round(time.time() - start_time, 3)
+    print(f'Time:{processing_time}')
     route_coords = list()
     for node_id in route:
         if node_id in nodes:
             route_coords.append(nodes[node_id]['coord'])
 
-    print(f'route found: {route}')
-    print(f'route coords: {route_coords}')
+    # print(f'route found: {route}')
+    # print(f'route coords: {route_coords}')
     route_data = {
         'route': route,
-        'coords': route_coords
+        'coords': route_coords,
     }
     redis_cache.set(cache_key, json.dumps(route_data))
     return jsonify(route_data)
@@ -83,7 +86,9 @@ def index():
 
 @app.route("/address")
 def address_page():
-    return render_template("addresses.html")
+    streets = street_names
+    address_amount = len(streets)
+    return render_template("addresses.html", addresses=streets, length=address_amount)
 
 def generate_cache_key(from_node, to_node):
     return f"{from_node}:{to_node}"

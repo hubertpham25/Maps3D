@@ -3,8 +3,37 @@
     <meta charset="UTF-8">
     <title>Maps3D | Addresses</title>
     <style>
-        
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        ul {
+            line-height: 1.8;
+        }
+
+        .nav-link-btn {
+            display: block;
+            width: 10%;
+            text-decoration: none;
+            height: 40px;
+            margin-bottom: 20px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 24px;
+            text-decoration: none;
+        }
     </style>
-
-
+<body>
+    <button onclick="window.location.href='/'" class="nav-link-btn">← Go Back</button>
+    <h1>Boston Street Addresses</h1>
+    <h3>Amount of Address : {{length}}</h3>
+        <ul>
+        {% for street in addresses %}
+        <li>{{street}}</li>
+        {% endfor %}
+        </ul>
+</body>
 </html>

@@ -26,6 +26,8 @@ def tree_parser():
             v = nd_tags.get('v')
 
             if k == "addr:housenumber":
+                if ("," in v) or ('-' in v):
+                    continue
                 street_num = v
             
             elif k == "addr:street":
@@ -34,7 +36,7 @@ def tree_parser():
             elif k == "name":
                 store_name = v
             
-            # this loop should grab everything listed above
+            # this loop should grab everything listed above and format it
             address = f"{street_num} {street.lower()}"
             if address and street:
                 address = f"{street_num} {street.lower()}".strip()
@@ -78,4 +80,11 @@ def tree_parser():
             if ref in nodes:
                 nodes[ref]['ways'].add(way_id)
     return nodes, ways, addresses
+
+def get_street_names(addresses):
+    street_names = list()
+    for street_name in addresses:
+        street_names.append(street_name)
+    return sorted(street_names)
+
     
