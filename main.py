@@ -66,8 +66,8 @@ def find_route():
 
     start_time = time.time()
     route = dijkstra(from_node, to_node, routing_graph)
-    processing_time = round(time.time() - start_time, 3)
-    print(f'Time: {processing_time} seconds')
+    processing_time = round((time.time() - start_time)*1000, 1)
+    print(f'Time: {processing_time} milliseconds')
     route_coords = list()
     for node_id in route:
         if node_id in nodes:
