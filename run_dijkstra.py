@@ -2,14 +2,19 @@ import heapq
 from graph_builder import calculate_distance
 
 def dijkstra(start, end, graph):
+    # initialize every node to be infinity and set only the starting node to 0
     distances = {node_id: float('inf') for node_id in graph}
     distances[start] = 0
     
     previous = {node_id: None for node_id in graph}
     
+
     to_visit = []
+
+    #priority queue
     heapq.heappush(to_visit, (0, start))
     
+    # checks for visited nodes
     visited = set()
     
     while to_visit:

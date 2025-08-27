@@ -7,7 +7,8 @@ def build_routing_graph(nodes, ways):
     for way_id, way_data in ways.items():
         if 'highway' not in way_data['tags']:
             continue
-            
+        
+        # filter non roads
         highway_type = way_data['tags']['highway']
         if highway_type in ['footway', 'cycleway', 'pedestrian', 'steps']:
             continue

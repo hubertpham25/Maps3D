@@ -19,12 +19,16 @@ print("Map data loaded")
 
 @app.route("/checkPoints", methods=['POST'])
 def check_points():
+
+    # gets the from and to locations from front end 
     data = request.get_json()
 
     from_address = data["from"].lower()
     to_address = data["to"].lower()
     print(f'from address sent: {from_address}')
     print(f'to address sent: {to_address}')
+
+    # checks if addresses are in the addresses dictionary
 
     if from_address not in addresses or to_address not in addresses:
         return jsonify({'error': 'Store not found'}), 404
@@ -36,12 +40,16 @@ def check_points():
 
 @app.route("/findRoute", methods=['POST'])
 def find_route():
+
+    # grab data from frontend, grab coordinates and convert to nodes
     coord_data = request.get_json()
     from_coord = coord_data["from_coords"]
     to_coord = coord_data["to_coords"]
 
     from_node = find_nearest_intersection(from_coord, intersections)
     to_node = find_nearest_intersection(to_coord, intersections)
+
+    # generate unique cache keys
     cache_key = generate_cache_key(from_node, to_node)
     cached = redis_cache.get(cache_key)
     if cached:
@@ -55,10 +63,11 @@ def find_route():
     print("To neighbors:", routing_graph.get(to_node, {}))
     print(f'finding route...')
 
+
     start_time = time.time()
     route = dijkstra(from_node, to_node, routing_graph)
     processing_time = round(time.time() - start_time, 3)
-    print(f'Time:{processing_time}')
+    print(f'Time: {processing_time} seconds')
     route_coords = list()
     for node_id in route:
         if node_id in nodes:
@@ -97,6 +106,7 @@ def find_nearest_intersection(coord, intersections):
     min_distance = float('inf')
     nearest_node = None
 
+    # finds the closest nodes as to not waste time searching much further nodes
     for node_id, node_data in intersections.items():
         distance = calculate_distance(coord, node_data['coord'])
         if distance < min_distance:
